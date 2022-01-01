@@ -15,8 +15,8 @@ public class MemberRepository {
     @PersistenceContext
     private EntityManager em; // spring이 entity manager를 생성하여서 주입해준다
 
-//    @PersistenceUnit
-//    private EntityManagerFactory emf;
+    //@PersistenceUnit
+    //private EntityManagerFactory emf;
     // 직접 주입 받을 수도 있음
 
     public void save(Member member){
@@ -35,4 +35,5 @@ public class MemberRepository {
     public List<Member> findByName(String name){
         return em.createQuery("select m from Member m where m.name = :name", Member.class).setParameter("name", name).getResultList();
     }
+
 }

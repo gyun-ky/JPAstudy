@@ -43,7 +43,7 @@ public class MemberService {
 
     private void validateDuplicateMember(Member member){
         List<Member> findMembers = memberRepository.findByName(member.getName()); // 멀티스레드를 고려하여 사실 db에 유니크 제약조건 걸자
-        if(findMembers.isEmpty()){
+        if(!findMembers.isEmpty()){
             throw new IllegalStateException("이미 존재하는 회원입니다.");
         }
     }
