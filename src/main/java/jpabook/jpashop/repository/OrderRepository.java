@@ -21,5 +21,19 @@ public class OrderRepository {
         return em.find(Order.class, id);
     }
 
-//    public List<Order> findAll(OrderSearch orderSearch){}
+    public List<Order> findAll(OrderSearch orderSearch){
+
+        return em.createQuery("select o from Order o join o.member m "
+                + "where o.status = :status "
+                + "and m.name like :name", Order.class)
+                .setParameter("status", orderSearch.getOrderStatus())
+                .setParameter("name", orderSearch.getMemberName())
+//                .setFirstResult(100) //paging 하고 싶은 때
+                .setMaxResults(1000)
+                .getResultList();
+
+    }
+
+    //동적 쿼리를 위해서는 QueryDSL 사용 - 검색 조건에 따라 SQL이 변화
+
 }
