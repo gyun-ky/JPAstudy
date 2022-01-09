@@ -79,7 +79,7 @@ public class ItemController {
         // 1. 준영속 엔티티라도 dirty checking 이용하는 방법
             // itemService에서 시
         // 2. merge 이용
-        itemService.saveItem(book);
+//        itemService.saveItem(book);
         return "redirect:/items";
     }
 
