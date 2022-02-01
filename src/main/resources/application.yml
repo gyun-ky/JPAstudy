@@ -7,7 +7,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create # create 인 경우 계속 data를 drop 시킴 / none 계속 data를 drop시키지 않음
     properties:
       hibernate:
 #        show_sql: true <-운영환경에서는 system out이 아닌 다 log를 통해 찍어야 함

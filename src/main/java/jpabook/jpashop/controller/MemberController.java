@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -53,4 +54,5 @@ public class MemberController {
         model.addAttribute("members", members); // member entity를 그래도 뿌리는 것 보다는 dto를 만들어서 뿌리는 것이 좋음
         return "members/memberList"; // api를 만들 때에는 이유를 불문하고 dto를 만들어서 반환해야 -> entity에 로직을 추가하면 api의 스펙이 변경되기 떄문
     }
+
 }
