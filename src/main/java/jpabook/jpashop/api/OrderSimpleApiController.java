@@ -5,9 +5,10 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryDto;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,6 +30,7 @@ import static java.util.stream.Collectors.toList;
 public class OrderSimpleApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderSimpleQueryRepository orderSimpleQueryRepository;
 
     @GetMapping("/api/v1/simple-orders")
     public List<Order> ordersV1(){
@@ -60,6 +62,33 @@ public class OrderSimpleApiController {
         return result;
     }
 
+    // ORDER -> SQL 1번 -> 결과 주문수 2개
+    // 첫번째 주문에 해당하는 member, delivery 조회 쿼리 나감
+    // 두번째 주문에 해당하는 member, delivery 조회 쿼리 나감
+    // N + 1 -> 1 + N 한번의 쿼리가 N개의 추가 실행을 불러옴
+    // 1 + member N + delivery N
+
+    // 지연 로딩 같은 경우에는 처음에는 쿼리를 날리고 불러온 것이라면 영속성 컨텍스트에 있는 것을 가져다 쓰기 때문에 모두 member1의 주문이라면 1 + 1 + N이 된다
+
+    // order table을 1차로 조회
+    // member table을 2차로 조회
+    // delivery table을 3차로 조회
+    // member table 4차로 조회
+    // delivery table을 5차로 조회
+
+    @GetMapping("/api/v3/simple-orders")
+    public List<SimpleOrderDto> ordersV3(){
+        List<Order> orders = orderRepository.findAllWithMemberDelivery();
+        return orders.stream()
+                .map(o-> new SimpleOrderDto(o))
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/api/v4/simple-orders")
+    public List<OrderSimpleQueryDto> ordersV4(){
+        return orderSimpleQueryRepository.findOrderDtos();
+    }
+
     @Data
     @RequiredArgsConstructor
     static class SimpleOrderDto{
@@ -71,10 +100,10 @@ public class OrderSimpleApiController {
 
         public SimpleOrderDto(Order order){
             orderId = order.getId();
-            name = order.getMember().getName();
+            name = order.getMember().getName(); // LAZY 초기화
             orderDate = order.getOrderDate();
             orderStatus = order.getStatus();
-            address = order.getDelivery().getAddress();
+            address = order.getDelivery().getAddress(); // LAZY 초기화
         }
     }
 
