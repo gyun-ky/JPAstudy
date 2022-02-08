@@ -12,7 +12,9 @@ spring:
       hibernate:
 #        show_sql: true <-운영환경에서는 system out이 아닌 다 log를 통해 찍어야 함
         format_sql: true
-
+        default_batch_fetch_size: 100 # 웬만하면 해당 옵션을 켜는 것이 좋음  -> 1+N 상황이 발생했을 때, orderItems들을 where order_item.order_id in (4, 7) 이런식으로 다음 쿼리를 날려서 한방에 가져와준다
+        # in query의 갯수를 몇개를 할 것인 ex) 총 데이터가 100건인데 10 설정해놓으면 10개를 땡겨온다! in에 10개를 넣는다 이거다
+        # item 같은 경우는 한번에 땡겨왔다 ex) 아이템이 1000개면 10번 적어놓으면 10번 loop를 돈다  1+N이 1+1+1로 만들어버리는 최적화됨 -> 실시간이면 redis cache 써야지
 logging:
   level:
     org.hibernate.SQL: debug
