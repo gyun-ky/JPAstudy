@@ -1,17 +1,31 @@
 package jpabook.jpashop.repository;
 
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jpabook.jpashop.domain.Order;
+import jpabook.jpashop.domain.OrderStatus;
+import jpabook.jpashop.domain.QMember;
+import jpabook.jpashop.domain.QOrder;
+import jpabook.jpashop.domain.item.Book;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.EntityManager;
 import java.util.List;
 
 @Repository
-@RequiredArgsConstructor
 public class OrderRepository {
 
     private final EntityManager em;
+
+    private final JPAQueryFactory query;
+
+    public OrderRepository(EntityManager em){
+        this.em = em;
+        this.query = new JPAQueryFactory(em);
+    }
 
     public void save(Order order){
         em.persist(order);
@@ -72,5 +86,36 @@ public class OrderRepository {
     // / 의존 관계는 controller -> repository 한 방향으로 흘러야
 
     //동적 쿼리를 위해서는 QueryDSL 사용 - 검색 조건에 따라 SQL이 변화
+    // 참고로 Q 객체들이 들어있는 generated는 git에서 빼주자 - build 타임에 생기는 것이라서
+    public List<Order> findAllByQueryDSL(OrderSearch orderSearch){
+        QOrder order = QOrder.order;
+        QMember member = QMember.member;
+
+//        JPAQueryFactory query = new JPAQueryFactory(em);
+
+
+        return query
+                .select(order)
+                .from(order)
+                .join(order.member, member)
+                .where(statusEq(orderSearch.getOrderStatus()), getNameLike(orderSearch.getMemberName()))
+                .limit(1000)
+                .fetch();
+    }
+
+    private BooleanExpression getNameLike(String memberName) {
+        if (!StringUtils.hasText(memberName)){
+            return null;
+        }
+        return QMember.member.name.like(memberName);
+    }
+
+    // 동적 쿼리로 만들기 위해 메소드를 선언하고 조건이 언제든 바뀔 수 있도록 설계
+    private BooleanExpression statusEq(OrderStatus statusCond){
+        if (statusCond == null){
+            return null;
+        }
+        return QOrder.order.status.eq(statusCond);
+    }
 
 }

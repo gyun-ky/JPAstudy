@@ -35,7 +35,7 @@ public class OrderService {
      */
     @Transactional
     public Long order(Long memberId, Long itemId, int count){
-        Member member = memberRepository.findById(memberId);
+        Member member = memberRepository.findById(memberId).get();
         Item item = itemRepository.findOne(itemId);
 
         //배송정보 생성

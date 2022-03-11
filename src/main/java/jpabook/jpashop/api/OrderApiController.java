@@ -9,6 +9,8 @@ import jpabook.jpashop.repository.order.query.OrderFlatDto;
 import jpabook.jpashop.repository.order.query.OrderItemQueryDto;
 import jpabook.jpashop.repository.order.query.OrderQueryDto;
 import jpabook.jpashop.repository.order.query.OrderQueryRepository;
+import jpabook.jpashop.service.query.OrderDto;
+import jpabook.jpashop.service.query.OrderQueryService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +30,7 @@ public class OrderApiController {
     // N을 가져오는 것은 카티션 프로덕트가 되어서 row 개수가 늘어나서 성능 최적화하기 어렵다
     private final OrderRepository orderRepository;
     private final OrderQueryRepository orderQueryRepository;
+    private final OrderQueryService orderQueryService;
 
     @GetMapping("/api/v1/orders")
     public List<Order> ordersV1(){
@@ -78,9 +81,17 @@ public class OrderApiController {
         // OrderItem 이 많으면 뻥튀기가 되어버린다
     }
 
+    @GetMapping("/api/v3.2-osiv/orders")
+    public List<OrderDto> ordersV32(){
+         // DB 입장에서 조인을 하면서 같은 order가 중복되어서 나타나게 된다
+        // OrderItem 이 많으면 뻥튀기가 되어버린다
+        return orderQueryService.orderV32();
+    }
+
     @GetMapping("/api/v4/orders")
     public List<OrderQueryDto> ordersV4(){
         return orderQueryRepository.findOrderQueryDtos();
+        // 단건 조회시에는 제일 괜찮음
     }
 
     @GetMapping("/api/v5/orders")
@@ -112,44 +123,8 @@ public class OrderApiController {
     }
 
 
-    @Getter // property가 없다는 오류면 대부분 Getter Setter
-    static class OrderDto{
 
-        private Long orderId;
-        private String name;
-        private LocalDateTime orderDate;
-        private OrderStatus orderStatus;
-        private Address address;
-//        private List<OrderItem> orderItems; // DTO 안에 Entity가 있어서도 안된다. 외부에 스펙이 노출이 된다
-        private List<OrderItemDto> orderItems;
 
-        public OrderDto(Order o){
-            orderId = o.getId();
-            name = o.getMember().getName();
-            orderDate = o.getOrderDate();
-            orderStatus = o.getStatus();
-            address = o.getDelivery().getAddress();
-//            o.getOrderItems().stream().forEach(o->o.getItem().getName()); // 프록시 초기화
-//            orderItems = o.getOrderItems();
-            orderItems = o.getOrderItems().stream()
-                    .map(orderItem->new OrderItemDto(orderItem))
-                    .collect(Collectors.toList());
-        }
-    }
-
-    @Getter
-    static class OrderItemDto{
-
-        private String itemName;
-        private int orderPrice;
-        private int count;
-
-        public OrderItemDto(OrderItem orderItem){
-            itemName = orderItem.getItem().getName();
-            orderPrice = orderItem.getOrderPrice();
-            count = orderItem.getCount();
-        }
-    }
 
 
     // 정리

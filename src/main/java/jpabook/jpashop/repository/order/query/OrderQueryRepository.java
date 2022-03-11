@@ -25,6 +25,7 @@ public class OrderQueryRepository {
             o.setOrderItems(orderItems);
         });
         return result;
+        // 단건 조회인 경우에는 납두어도 괜춘
    }
 
    private List<OrderItemQueryDto> findOrderItems(Long orderId){
@@ -55,7 +56,7 @@ public class OrderQueryRepository {
 
        Map<Long, List<OrderItemQueryDto>> orderItemMap = findOrderItemMap(orderIds);
        result.forEach(o -> o.setOrderItems(orderItemMap.get(o.getOrderId())));
-
+        //나머지는 메모리에서 재조립
         return result;
     }
 
@@ -92,6 +93,10 @@ public class OrderQueryRepository {
                         " join oi.item i", OrderFlatDto.class).getResultList();
 
     }
+
+    // order item 기준으로는 페이징이 가능하나 order로는 못함
+    // data가 많으면 중복 전송이 증가해서 v5와 비교해서 성능 차이도 미비하다ㅏㅏㅏ
+    // 사실 v5 in 절로 날리는 것이 batch size 설정하여 보내는 것과 같다!!!!!
 
 
 

@@ -2,6 +2,7 @@ package jpabook.jpashop.service;
 
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.repository.MemberRepository;
+import jpabook.jpashop.repository.MemberRepositoryOld;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,13 +59,13 @@ public class MemberService {
 
     @Transactional
     public void update(Long id, String name){
-        Member member = memberRepository.findById(id); // id를 가지고 영속성 컨텍스트 보기 -> 없음 -> db에서 끌고옴
+        Member member = memberRepository.findById(id).get(); // id를 가지고 영속성 컨텍스트 보기 -> 없음 -> db에서 끌고옴
         member.setName(name); // 영속 상태인 member를 setname으로 이름을 바꿔주면 -> spring AOP가 동작하면서 transactional annotation에 의해서 transaction AOP가 끝나는 시점에 영속성 flush -> db transactino commit
     }
     // memeber를 반환하면 : command 랑 쿼리를 철저하게 분리하자는 정책! 변경성 메서드인데 조회해버리는 꼴이 되니까 앵간하면 걍 void
 
 //    @Transactional(readOnly = true)
     public Member findOne(Long memberId){
-        return memberRepository.findById(memberId);
+        return memberRepository.findById(memberId).get();
     }
 }
